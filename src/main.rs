@@ -31,6 +31,14 @@ impl Torrent {
             .dht_client
             .get_peers(Id::from_str(&self.info_hash).unwrap())
             .unwrap();
+
+        loop {
+            let next = res.next();
+            if next.is_none() {
+                break;
+            }
+            println!("{:?}", next);
+        }
     }
 }
 
@@ -41,13 +49,11 @@ fn main() {
         dht_client: Dht::client().unwrap(),
     };
 
-    let dht_client = &state.dht_client;
-
     let mut torrent = Torrent {
         peers: Vec::new(),
         trackers: Vec::new(),
-        dht_client: dht_client.clone(),
-        info_hash,
+        dht_client: state.dht_client.clone(),
+        info_hash: info_hash.trim().to_string(),
     };
 
     torrent.get_peers();
