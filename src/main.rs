@@ -18,14 +18,15 @@ struct AppState {
     dht_client: Dht,
 }
 
-struct Torrent {
+struct Torrent<'a> {
     dht_client: Dht,
     info_hash: String,
     peers: Vec<SocketAddr>,
     trackers: Vec<SocketAddr>,
+    payload: &'a [u8],
 }
 
-impl Torrent {
+impl<'a> Torrent<'a> {
     fn get_peers(&mut self) {
         let mut res = self
             .dht_client
@@ -54,6 +55,7 @@ fn main() {
         trackers: Vec::new(),
         dht_client: state.dht_client.clone(),
         info_hash: info_hash.trim().to_string(),
+        payload: &Vec::new(),
     };
 
     torrent.get_peers();
