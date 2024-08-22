@@ -16,17 +16,20 @@ const DHT_BOOTSTRAP_NODES: [&str; 7] = [
 
 struct AppState {
     dht_client: Dht,
+    // using a vec here will throw everything onto the heap by default, which saves us the trouble
+    // of allocating torrent members there and referencing them
+    torrents: Vec<Torrent>,
 }
 
-struct Torrent<'a> {
+struct Torrent {
     dht_client: Dht,
     info_hash: String,
     peers: Vec<SocketAddr>,
     trackers: Vec<SocketAddr>,
-    content: Option<&'a [u8]>,
+    content: Option<Vec<u8>>,
 }
 
-impl<'a> Torrent<'a> {
+impl Torrent {
     fn get_peers(&mut self) {
         let mut res = self
             .dht_client
@@ -50,6 +53,7 @@ fn main() {
 
     let state = AppState {
         dht_client: Dht::client().unwrap(),
+        torrents: Vec::new(),
     };
 
     let mut torrent = Torrent {
