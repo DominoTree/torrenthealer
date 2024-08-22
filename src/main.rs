@@ -1,10 +1,8 @@
-use mainline::{Dht, Id};
+use std::fs::read_to_string;
+use std::net::SocketAddr;
 use std::str::FromStr;
 
-struct AppState {
-    dht_client: Dht,
-    torrent_groups: Vec<TorrentGroup>,
-}
+use mainline::{Dht, Id};
 
 const DHT_BOOTSTRAP_NODES: [&str; 7] = [
     "dht.aelitis.com:6881",
@@ -16,44 +14,39 @@ const DHT_BOOTSTRAP_NODES: [&str; 7] = [
     "router.utorrent.com:6881",
 ];
 
-struct TorrentGroup {
-    torrents: Vec<Torrent>,
+struct AppState {
+    dht_client: Dht,
 }
 
 struct Torrent {
     info_hash: String,
-    files: Vec<File>,
+    peers: Vec<SocketAddr>,
+    trackers: Vec<SocketAddr>,
 }
 
-struct File {
-    hash: String,
-    name: String,
+impl Torrent {
+    fn get_peers(&mut self) {}
 }
 
 fn main() {
+    let info_hash = read_to_string("magnets.txt").unwrap();
+
     let state = AppState {
         dht_client: Dht::client().unwrap(),
-        torrent_groups: vec![],
     };
 
-    loop {
-        let dht_client = &state.dht_client;
-        let torrent_groups = &state.torrent_groups;
+    let dht_client = &state.dht_client;
 
-        for torrent_group in torrent_groups {
-            for torrent in &torrent_group.torrents {
-                for file in &torrent.files {
-                    let hash = &file.hash;
-                    let name = &file.name;
-                    let info_hash = &torrent.info_hash;
-                    let peers = dht_client
-                        .get_peers(Id::from_str(info_hash).unwrap())
-                        .unwrap();
-                    for peer in peers {
-                        println!("Peer: {} - File: {}", "lol", name);
-                    }
-                }
-            }
+    let mut res = dht_client
+        .get_peers(Id::from_str(&info_hash.trim()).unwrap())
+        .unwrap();
+
+    loop {
+        let lol = res.next();
+        println!("{:?}", lol);
+
+        if lol.is_none() {
+            break;
         }
     }
 }
