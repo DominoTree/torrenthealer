@@ -19,13 +19,19 @@ struct AppState {
 }
 
 struct Torrent {
+    dht_client: Dht,
     info_hash: String,
     peers: Vec<SocketAddr>,
     trackers: Vec<SocketAddr>,
 }
 
 impl Torrent {
-    fn get_peers(&mut self) {}
+    fn get_peers(&mut self) {
+        let mut res = self
+            .dht_client
+            .get_peers(Id::from_str(&self.info_hash).unwrap())
+            .unwrap();
+    }
 }
 
 fn main() {
@@ -37,16 +43,12 @@ fn main() {
 
     let dht_client = &state.dht_client;
 
-    let mut res = dht_client
-        .get_peers(Id::from_str(&info_hash.trim()).unwrap())
-        .unwrap();
+    let mut torrent = Torrent {
+        peers: Vec::new(),
+        trackers: Vec::new(),
+        dht_client: dht_client.clone(),
+        info_hash,
+    };
 
-    loop {
-        let lol = res.next();
-        println!("{:?}", lol);
-
-        if lol.is_none() {
-            break;
-        }
-    }
+    torrent.get_peers();
 }
