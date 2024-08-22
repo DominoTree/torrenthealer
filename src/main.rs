@@ -23,7 +23,7 @@ struct Torrent<'a> {
     info_hash: String,
     peers: Vec<SocketAddr>,
     trackers: Vec<SocketAddr>,
-    payload: &'a [u8],
+    content: Option<&'a [u8]>,
 }
 
 impl<'a> Torrent<'a> {
@@ -41,6 +41,8 @@ impl<'a> Torrent<'a> {
             println!("{:?}", next);
         }
     }
+
+    fn get_content(&mut self) {}
 }
 
 fn main() {
@@ -55,7 +57,7 @@ fn main() {
         trackers: Vec::new(),
         dht_client: state.dht_client.clone(),
         info_hash: info_hash.trim().to_string(),
-        payload: &Vec::new(),
+        content: None,
     };
 
     torrent.get_peers();
