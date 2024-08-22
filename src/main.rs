@@ -30,7 +30,7 @@ struct Torrent {
 }
 
 impl Torrent {
-    fn get_peers(&mut self) {
+    fn get_peers_from_dht(&mut self) {
         let mut res = self
             .dht_client
             .get_peers(Id::from_str(&self.info_hash).unwrap())
@@ -66,5 +66,5 @@ fn main() {
         content: None,
     };
 
-    torrent.get_peers();
+    torrent.get_peers_from_dht();
 }
