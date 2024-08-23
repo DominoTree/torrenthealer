@@ -37,14 +37,20 @@ impl Torrent {
             .unwrap();
 
         loop {
-            // these need to be deduped because the same peer may exist on multiple bootstrap nodes
             match res.next() {
-                Some(mut res) => self.peers.append(&mut res),
+                Some(mut res) => {
+                    println!("Found {} peers", res.len());
+                    self.peers.append(&mut res);
+                }
                 None => break,
             };
         }
 
-        println!("{:?}", self.peers);
+        // sort and dedup peers (peers may exist on more than one bootstrap node)
+        self.peers.sort();
+        self.peers.dedup();
+
+        println!("Total of {} unique peers", self.peers.len());
     }
 
     fn get_content(&mut self) {}
