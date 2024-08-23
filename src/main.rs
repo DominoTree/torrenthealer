@@ -2,6 +2,7 @@ use std::fs::read_to_string;
 use std::net::SocketAddr;
 use std::str::FromStr;
 
+use log::info;
 use mainline::{Dht, Id};
 
 const DHT_BOOTSTRAP_NODES: [&str; 7] = [
@@ -39,7 +40,7 @@ impl Torrent {
         loop {
             match res.next() {
                 Some(mut res) => {
-                    println!("Found {} peers", res.len());
+                    info!("Found {} peers", res.len());
                     self.peers.append(&mut res);
                 }
                 None => break,
@@ -50,13 +51,17 @@ impl Torrent {
         self.peers.sort();
         self.peers.dedup();
 
-        println!("Total of {} unique peers", self.peers.len());
+        info!("Total of {} unique peers", self.peers.len());
     }
 
     fn get_content(&mut self) {}
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().ok().unwrap();
+    tracing_subscriber::fmt::init();
+
     let info_hash = read_to_string("magnets.txt").unwrap();
 
     let state = AppState {
